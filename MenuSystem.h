@@ -1,18 +1,23 @@
 #pragma once
 #include "StadiumManager.h"
 #include "BookingManager.h"
-#include "CustomExceptions.h"
+#include "user.h"
 #include <iostream>
 
 class MenuSystem {
 public:
     MenuSystem();
     void run();
+
 private:
+    StadiumManager stadiumManager;
+    BookingManager bookingManager;
+    UserManager userManager;
+
     void showMenu();
     void handleInput();
     void viewStadiums();
     void bookStadium();
-    void addStadium(); // Add this
-    void viewStadiumDetails(int stadiumID); // Add this for viewing full details of a stadium
+    void addStadium();
+    void viewStadiumDetails(int stadiumID);
 };
