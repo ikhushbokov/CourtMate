@@ -2,6 +2,9 @@
 #include <iostream>
 #include <fstream>
 
+#include <string>
+#include <vector>
+
 using namespace std;
 
 BookingManager::BookingManager(StadiumManager* stadiumMgr) : stadiumManager(stadiumMgr) {}
@@ -18,19 +21,22 @@ void BookingManager::addBooking(Booking* booking) {
 
 void BookingManager::displayAllBookings() const {
     for (const Booking* booking : bookings) {
-        // Retrieve the stadium details associated with the booking
-        int stadiumID = booking->getStadiumID();
-        Stadium* stadium = stadiumManager->getStadiumByID(stadiumID); // Assuming you implement getStadiumByID
-
-        cout << "Booking ID: " << booking->getBookingID()
-             << " Stadium ID: " << stadium->getID()
-             << " Name: " << stadium->getName()
-             << " Location: " << stadium->getLocation()
-             << " Type: " << stadium->getType()
-             << " Price/Hour: " << stadium->getPrice() << " sums/hour"
-             << " User: " << booking->getUserName()
-             << " Date: " << booking->getTimeSlot().date
-             << " Time: " << booking->getTimeSlot().startHour << endl;
+        Stadium* stadium = stadiumManager->getStadiumByID(booking->getStadiumID());
+        if (stadium) {
+            cout << "---------------------------\n";
+            cout << "Booking ID: " << booking->getBookingID() << "\n";
+            cout << "User: " << booking->getUserName() << "\n";
+            cout << "Date: " << booking->getTimeSlot().date
+                << " | Time: " << booking->getTimeSlot().startHour
+                << " | Duration: " << booking->getTimeSlot().duration << "h\n";
+            cout << "Stadium: " << stadium->getName()
+                << " | Location: " << stadium->getLocation()
+                << " | Type: " << stadium->getType()
+                << " | Price: " << stadium->getPricePerHour() << " UZS/hour\n";
+        }
+        else {
+            cout << "Booking ID: " << booking->getBookingID() << " — Stadium not found.\n";
+        }
     }
 }
 
@@ -50,8 +56,9 @@ void BookingManager::saveToFile(const string& filename) const {
             file << booking->serialize();
         }
         file.close();
-    } else {
-        cerr << "Unable to open file." << endl;
+    }
+    else {
+        cerr << "Unable to open file.\n";
     }
 }
 
@@ -62,10 +69,16 @@ void BookingManager::loadFromFile(const string& filename) {
         while (getline(file, line)) {
             Booking* booking = new Booking();
             booking->deserialize(line);
+
+            // Восстановление stadium*
+            Stadium* stadium = stadiumManager->getStadiumByID(booking->getStadiumID());
+            booking->setStadium(stadium);
+
             addBooking(booking);
         }
         file.close();
-    } else {
-        cerr << "Unable to open file." << endl;
+    }
+    else {
+        cerr << "Unable to open file.\n";
     }
 }
