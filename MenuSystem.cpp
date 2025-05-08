@@ -1,21 +1,87 @@
 #include "MenuSystem.h"
+#include "FootballStadium.h"
+#include "BasketballStadium.h"
+#include <limits>
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <limits>
+#include <vector>
+
 using namespace std;
 
-MenuSystem::MenuSystem() {}
+MenuSystem::MenuSystem() : bookingManager(&stadiumManager) {
+    stadiumManager.loadFromFile("stadiums.txt");
+    bookingManager.loadFromFile("bookings.txt");
+    userManager.loadFromFile("users.txt");
+}
+
+void MenuSystem::run() {
+    stadiumManager.loadFromFile("stadiums.txt");
+    bookingManager.loadFromFile("bookings.txt");
+    userManager.loadFromFile("users.txt");
+    userManager.loadSession(); // 🟢 загрузка текущей сессии
+
+    if (!userManager.getCurrentUsername().empty()) {
+        cout << "Welcome back, " << userManager.getCurrentUsername() << "!\n";
+    }
+    else {
+        std::string choice;
+        cout << "\n=== Welcome to the Stadium Booking System ===\n";
+        cout << "1 - Login\n";
+        cout << "2 - Register\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        std::string uname, pword;
+        cout << "Username: ";
+        cin >> uname;
+        cout << "Password: ";
+        cin >> pword;
+
+        if (choice == "1") {
+            if (!userManager.loginUser(uname, pword)) {
+                cout << "Login failed. Exiting program.\n";
+                return;
+            }
+        }
+        else if (choice == "2") {
+            if (!userManager.registerUser(uname, pword)) {
+                cout << "Registration failed. Exiting program.\n";
+                return;
+            }
+        }
+        else {
+            cout << "Invalid choice. Exiting program.\n";
+            return;
+        }
+
+        userManager.saveSession(); // 🟢 сохранить сессию
+    }
+
+    cout << "Welcome, " << userManager.getCurrentUsername() << "!\n";
+
+    // 🔁 Запуск основного меню
+    handleInput();
+
+    // 💾 Сохранение после выхода
+    stadiumManager.saveToFile("stadiums.txt");
+    bookingManager.saveToFile("bookings.txt");
+    userManager.saveToFile("users.txt");
+    userManager.saveSession(); // 🔁 сохранить снова, на всякий случай
+}
+
 
 void MenuSystem::showMenu() {
     cout << "\n--- Sports Stadium Booking System ---\n";
     cout << "1. View Stadiums\n";
     cout << "2. Book Stadium\n";
     cout << "3. Add Stadium\n";
-    cout << "4. View Stadium Details\n"; // Add option for full stadium details
-    cout << "5. Exit\n";
+    cout << "4. View Stadium Details\n";
+    cout << "5. View All Bookings\n";
+    cout << "6. Logout\n";  // 🔁 было Exit
     cout << "Enter choice: ";
 }
+
 
 void MenuSystem::handleInput() {
     int choice;
@@ -29,100 +95,105 @@ void MenuSystem::handleInput() {
         }
 
         switch (choice) {
-            case 1:
-                viewStadiums();
-                break;
-            case 2:
-                bookStadium();
-                break;
-            case 3:
-                addStadium();
-                break;
-            case 4:
-                {
-                    int stadiumID;
-                    cout << "Enter Stadium ID to view details: ";
-                    cin >> stadiumID;
-                    viewStadiumDetails(stadiumID);
-                }
-                break;
-            case 5:
-                cout << "Exiting...\n";
-                return;
-            default:
-                cout << "Invalid choice. Try again.\n";
+        case 1: viewStadiums(); break;
+        case 2: bookStadium(); break;
+        case 3: addStadium(); break;
+        case 4: {
+            int stadiumID;
+            cout << "Enter Stadium ID to view details: ";
+            cin >> stadiumID;
+            viewStadiumDetails(stadiumID);
+            break;
+        }
+        case 5:
+            bookingManager.displayAllBookings();
+            break;
+        case 6:
+            userManager.logout();
+            cout << "You have been logged out.\n";
+            run(); // ✅ безопасный повторный вход
+            return;
+
+            return;
+        default:
+            cout << "Invalid choice. Try again.\n";
         }
     }
 }
 
+
 void MenuSystem::viewStadiums() {
-    ifstream inFile("stadiums.txt");
-    string line;
-    cout << "\nAvailable Stadiums:\n";
-    while (getline(inFile, line)) {
-        cout << line << endl;
+    stadiumManager.displayAllStadiums();
+}
+
+void MenuSystem::viewStadiumDetails(int stadiumID) {
+    stadiumManager.displayStadiumDetails(stadiumID);
+}
+
+void MenuSystem::addStadium() {
+    int id;
+    string name, location, type;
+    float pricePerHour;
+    float rating;
+
+    cout << "Enter Stadium ID: ";
+    cin >> id; cin.ignore();
+    cout << "Enter Stadium Name: ";
+    getline(cin, name);
+    cout << "Enter Stadium Location: ";
+    getline(cin, location);
+    cout << "Enter Type (Football/Basketball): ";
+    getline(cin, type);
+    cout << "Enter Price per Hour: ";
+    cin >> pricePerHour;
+    cout << "Enter Rating (0-5): ";
+    cin >> rating;
+
+    Stadium* stadium = nullptr;
+    if (type == "Football" || type == "football") {
+        stadium = new FootballStadium(id, name, location, pricePerHour, rating);
     }
-    inFile.close();
+    else if (type == "Basketball" || type == "basketball") {
+        stadium = new BasketballStadium(id, name, location, pricePerHour, rating);
+    }
+    else {
+        cout << "Invalid type.\n";
+        return;
+    }
+
+    stadiumManager.addStadium(stadium);
+    cout << "Stadium added.\n";
 }
 
 void MenuSystem::bookStadium() {
     int stadiumID;
-    string customerName;
-    cout << "Enter Stadium ID to book: ";
-    cin >> stadiumID;
+    TimeSlot slot;
+
     cin.ignore();
-    cout << "Enter your name: ";
-    getline(cin, customerName);
-
-    // Booking logic here (implement with booking manager or other logic)
-    cout << "Stadium booked successfully.\n";
-}
-
-void MenuSystem::addStadium() {
-    int id, capacity;
-    string name, location, type;
-    float pricePerHour;
-    int availableHoursCount;
-
     cout << "Enter Stadium ID: ";
-    cin >> id;
-    cin.ignore();
+    cin >> stadiumID;
 
-    cout << "Enter Stadium Name: ";
-    getline(cin, name);
+    cout << "Enter date (YYYY-MM-DD): ";
+    cin >> slot.date;
+    cout << "Enter start hour (0-23): ";
+    cin >> slot.startHour;
+    cout << "Enter duration in hours: ";
+    cin >> slot.duration;
 
-    cout << "Enter Stadium Location: ";
-    getline(cin, location);
+    Stadium* stadium = stadiumManager.getStadiumByID(stadiumID);
+    if (!stadium) {
+        cout << "Stadium not found.\n";
+        return;
+    }
 
-    cout << "Enter Stadium Type: ";
-    getline(cin, type);
-
-    cout << "Enter Price per Hour in Uzbek Sums: ";
-    cin >> pricePerHour;
-
-    cout << "Enter number of Available Hours: ";
-    cin >> availableHoursCount;
-    // Note: You might need to implement the available hours storage and logic
-
-    ofstream outFile("stadiums.txt", ios::app);
-    outFile << "ID: " << id << ", Name: " << name << ", Location: " << location
-            << ", Type: " << type << ", Price per Hour: " << pricePerHour
-            << ", Available Hours: " << availableHoursCount << "\n";
-    outFile.close();
-
-    cout << "Stadium added successfully.\n";
-}
-
-void MenuSystem::viewStadiumDetails(int stadiumID) {
-    // Logic to display all the details of the stadium
-    // This could call the StadiumManager's methods to get all the stadium data
-    cout << "Fetching details for Stadium ID: " << stadiumID << "...\n";
-
-    // Assuming you have a StadiumManager instance and the stadium exists
-    // For simplicity, just displaying sample info (replace with actual call to your stadium manager)
-    cout << "ID: " << stadiumID << ", Name: Example Stadium, Location: Someplace, Type: Football, Price: 1000 sums/hour, Rating: 4.5/5\n";
-}
-
-void MenuSystem::run() {
-    handleInput();
+    string username = userManager.getCurrentUsername();
+    Booking* booking = new Booking(stadiumID, username, slot, stadium);
+    if (bookingManager.isBookingAvailable(*booking)) {
+        bookingManager.addBooking(booking);
+        cout << "Booking successful!\n";
+    }
+    else {
+        delete booking;
+        cout << "Time slot not available.\n";
+    }
 }
