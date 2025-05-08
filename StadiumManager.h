@@ -24,3 +24,4 @@ public:
     Stadium* getStadiumByID(int id) const;
 
 };
+
