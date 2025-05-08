@@ -1,47 +1,29 @@
 #pragma once
-#include <iostream>
 #include <string>
-#include <vector>
 
 class Stadium {
 protected:
     int id;
     std::string name;
     std::string location;
-    std::string type;
     float pricePerHour;
     float rating;
-    int totalRatings;
-    float ratingSum;
-    int openHour;  // Opening hour (e.g., 8 AM)
-    int closeHour; // Closing hour (e.g., 10 PM)
-    std::vector<int> availableHours; // List of available hours for booking
 
 public:
-    Stadium();
-    Stadium(int id, std::string name, std::string location, std::string type, float price, int open, int close);
-    virtual ~Stadium();
+    Stadium() = default;
+    Stadium(int id, const std::string& name, const std::string& location, float price, float rating);
 
-    virtual void displayInfo() const;
-    void rateStadium(int stars);
-    void rateStadium(float stars);  // Overloaded
+    virtual ~Stadium() = default;
 
     int getID() const;
     std::string getName() const;
-    std::string getType() const;
     std::string getLocation() const;
-    float getPrice() const;
+    float getPricePerHour() const;
     float getRating() const;
-    int getOpenHour() const;
-    int getCloseHour() const;
-    const std::vector<int>& getAvailableHours() const;
 
-    // File I/O support
-    virtual std::string serialize() const;
-    virtual void deserialize(const std::string& data);
+    virtual std::string getType() const = 0;
 
-    // New methods for managing available hours
-    void addAvailableHour(int hour);
-    bool isAvailableAt(int hour) const;
+    virtual void displayInfo() const = 0;
+    virtual std::string serialize() const = 0;
+    virtual void deserialize(const std::string& data) = 0;
 };
-
