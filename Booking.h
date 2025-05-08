@@ -1,18 +1,24 @@
 #pragma once
 #include <string>
-#include "Stadium.h"  // Added to get stadium info for display
+#include "Stadium.h"
+#include <iostream>
+#include <fstream>
+#include <vector>
+using namespace std;
+
 
 struct TimeSlot {
-    std::string date;     // Format: YYYY-MM-DD
-    int startHour;        // 24-hour format (e.g., 14 for 2 PM)
-    int duration;         // In hours
+    std::string date;
+    int startHour = 0;
+    int duration = 1;
 
     bool operator==(const TimeSlot& other) const {
         return date == other.date &&
-               ((startHour < other.startHour + other.duration && startHour >= other.startHour) ||
+            ((startHour < other.startHour + other.duration && startHour >= other.startHour) ||
                 (other.startHour < startHour + duration && other.startHour >= startHour));
     }
 };
+
 
 class Booking {
 private:
@@ -21,7 +27,7 @@ private:
     int stadiumID;
     std::string userName;
     TimeSlot timeSlot;
-    Stadium* stadium; // Pointer to Stadium object for reference
+    Stadium* stadium;
 
 public:
     Booking();
@@ -31,10 +37,11 @@ public:
     TimeSlot getTimeSlot() const;
     std::string getUserName() const;
     int getBookingID() const;
-    void displayBookingInfo() const; // Display all booking details
+
+    void displayBookingInfo() const;
+    void setStadium(Stadium* stadiumPtr);  // ✅ новое
 
     std::string serialize() const;
     void deserialize(const std::string& data);
-
     bool conflictsWith(const Booking& other) const;
 };
