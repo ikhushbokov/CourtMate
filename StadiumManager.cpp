@@ -2,6 +2,8 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include "FootballStadium.h"
+#include "BasketballStadium.h"
 
 using namespace std;
 
@@ -67,20 +69,37 @@ void StadiumManager::searchStadiumsByRating(float rating) const {
     }
 }
 
-void StadiumManager::loadFromFile(const string& filename) {
-    ifstream file(filename);
-    if (file.is_open()) {
-        string line;
-        while (getline(file, line)) {
-            Stadium* stadium = new Stadium();
-            stadium->deserialize(line);
-            addStadium(stadium);
-        }
-        file.close();
-    } else {
-        cerr << "Unable to open file." << endl;
+void StadiumManager::loadFromFile(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Unable to open file.\n";
+        return;
     }
+
+    std::string line;
+    while (getline(file, line)) {
+        std::stringstream ss(line);
+        std::string type;
+        getline(ss, type, ',');
+
+        Stadium* stadium = nullptr;
+        if (type == "Football") {
+            stadium = new FootballStadium();
+        }
+        else if (type == "Basketball") {
+            stadium = new BasketballStadium();
+        }
+        else {
+            continue; // skip unknown type
+        }
+
+        stadium->deserialize(line);
+        stadiums.push_back(stadium);
+    }
+
+    file.close();
 }
+
 
 void StadiumManager::saveToFile(const string& filename) const {
     ofstream file(filename);
@@ -89,7 +108,8 @@ void StadiumManager::saveToFile(const string& filename) const {
             file << stadium->serialize();
         }
         file.close();
-    } else {
+    }
+    else {
         cerr << "Unable to open file." << endl;
     }
 }
