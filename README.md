@@ -41,3 +41,42 @@ Compile the project using:
 ```bash
 g++ main.cpp MenuSystem.cpp BookingManager.cpp Booking.cpp StadiumManager.cpp FootballStadium.cpp BasketballStadium.cpp user.cpp -o stadium_app
 ./stadium_app
+
+Requires a C++ compiler supporting C++20 (e.g., g++, clang++)
+
+✅ Features
+🔐 User Registration and Login
+
+🏟 Add and View Stadiums
+
+📆 Book Stadiums with Availability Check
+
+📋 View All Bookings
+
+🔁 Logout and Session Switching
+
+💾 Persistent Data Saved to Files
+
+📈 Future Enhancements
+⭐ Add user reviews and stadium ratings
+
+🛠 Edit or delete existing stadiums and bookings
+
+🖥 Build a GUI version using Qt or another framework
+
+🔁 Import/Export data via CSV or JSON
+
+👨‍💻 Developer Guide
+Start from MenuSystem.cpp to modify application flow
+
+Add new fields by updating corresponding .h files
+
+Data is saved and loaded via .serialize() / .deserialize()
+
+Integrate new entities into relevant managers
+
+📄 License
+This project is currently for academic and personal learning purposes.
+
+
+
