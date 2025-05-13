@@ -20,4 +20,10 @@ private:
     void bookStadium();
     void addStadium();
     void viewStadiumDetails(int stadiumID);
+    void editStadium();
+    void removeStadium();
+    void addReview();
+    void viewReviews();
+
+
 };

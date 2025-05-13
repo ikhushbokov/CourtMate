@@ -20,6 +20,7 @@ public:
     void searchStadiumsByRating(float rating) const;
     void loadFromFile(const std::string& filename);
     void saveToFile(const std::string& filename) const;
+    bool removeStadium(int id);
 
     Stadium* getStadiumByID(int id) const;
 

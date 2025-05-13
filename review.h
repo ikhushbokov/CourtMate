@@ -1,26 +1,25 @@
-#ifndef REVIEW_H
-#define REVIEW_H
-
+#pragma once
 #include <string>
+#include <iostream>
 
 class Review {
 private:
     std::string username;
     std::string stadiumName;
     std::string comment;
-    int rating; // от 1 до 5
+    int rating;
 
 public:
-    Review();
-    Review(const std::string& username, const std::string& stadiumName, const std::string& comment, int rating);
+    Review() = default;
+    Review(const std::string& user, const std::string& stadium, const std::string& comment, int rating);
 
     std::string getUsername() const;
     std::string getStadiumName() const;
     std::string getComment() const;
     int getRating() const;
 
+    std::string serialize() const;
+    static Review deserialize(const std::string& data);
+
     void display() const;
 };
-
-#endif
-

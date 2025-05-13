@@ -1,31 +1,34 @@
-#include "review.h"
-#include <iostream>
+#include "Review.h"
 
-Review::Review() : rating(0) {}
-
-Review::Review(const std::string& username, const std::string& stadiumName, const std::string& comment, int rating)
-    : username(username), stadiumName(stadiumName), comment(comment), rating(rating) {
+Review::Review(const std::string& user, const std::string& stadium, const std::string& comment, int rating)
+    : username(user), stadiumName(stadium), comment(comment), rating(rating) {
 }
 
-std::string Review::getUsername() const {
-    return username;
+std::string Review::getUsername() const { return username; }
+std::string Review::getStadiumName() const { return stadiumName; }
+std::string Review::getComment() const { return comment; }
+int Review::getRating() const { return rating; }
+
+std::string Review::serialize() const {
+    return username + ";" + stadiumName + ";" + comment + ";" + std::to_string(rating) + "\n";
 }
 
-std::string Review::getStadiumName() const {
-    return stadiumName;
-}
+Review Review::deserialize(const std::string& data) {
+    size_t pos1 = data.find(';');
+    size_t pos2 = data.find(';', pos1 + 1);
+    size_t pos3 = data.find(';', pos2 + 1);
 
-std::string Review::getComment() const {
-    return comment;
-}
+    std::string user = data.substr(0, pos1);
+    std::string stadium = data.substr(pos1 + 1, pos2 - pos1 - 1);
+    std::string comment = data.substr(pos2 + 1, pos3 - pos2 - 1);
+    int rating = std::stoi(data.substr(pos3 + 1));
 
-int Review::getRating() const {
-    return rating;
+    return Review(user, stadium, comment, rating);
 }
 
 void Review::display() const {
-    std::cout << "Пользователь: " << username << "\n";
-    std::cout << "Стадион: " << stadiumName << "\n";
-    std::cout << "Оценка: " << rating << "/5\n";
-    std::cout << "Комментарий: " << comment << "\n\n";
+    std::cout << "User: " << username << "\n"
+        << "Stadium: " << stadiumName << "\n"
+        << "Comment: " << comment << "\n"
+        << "Rating: " << rating << "/5\n";
 }

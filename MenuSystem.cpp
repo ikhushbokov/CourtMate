@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "Review.h"
 
 using namespace std;
 
@@ -77,8 +78,14 @@ void MenuSystem::showMenu() {
     cout << "2. Book Stadium\n";
     cout << "3. Add Stadium\n";
     cout << "4. View Stadium Details\n";
-    cout << "5. View All Bookings\n";
-    cout << "6. Logout\n";  // 🔁 было Exit
+	cout << "5. View All Bookings\n";
+    cout << "6. Clear Screen\n"; // 🔁 было 5
+    cout << "7. Edit Stadium\n";
+    cout << "8. Remove Stadium\n";
+    cout << "9. Logout\n";// 🔁 было Exit
+    cout << "10. Add Review\n";
+    cout << "11. View Reviews\n";
+
     cout << "Enter choice: ";
 }
 
@@ -105,19 +112,21 @@ void MenuSystem::handleInput() {
             viewStadiumDetails(stadiumID);
             break;
         }
-        case 5:
-            bookingManager.displayAllBookings();
-            break;
-        case 6:
-            userManager.logout();
+        case 5: bookingManager.displayAllBookings(); break;
+        case 6: system("cls"); break; // Очистка экрана
+        case 7: editStadium(); break;
+        case 8: removeStadium(); break;
+        case 9:
             cout << "You have been logged out.\n";
-            run(); // ✅ безопасный повторный вход
+            userManager.logout();
+            run();
             return;
-
-            return;
+        case 10: addReview(); break;
+        case 11: viewReviews(); break;
         default:
             cout << "Invalid choice. Try again.\n";
         }
+
     }
 }
 
@@ -197,3 +206,95 @@ void MenuSystem::bookStadium() {
         cout << "Time slot not available.\n";
     }
 }
+void MenuSystem::editStadium() {
+    int stadiumID;
+    cout << "Enter Stadium ID to edit: ";
+    cin >> stadiumID;
+    Stadium* stadium = stadiumManager.getStadiumByID(stadiumID);
+    if (!stadium) {
+        cout << "Stadium not found.\n";
+        return;
+    }
+
+    string name, location;
+    float price, rating;
+
+    cin.ignore();
+    cout << "Enter new name (" << stadium->getName() << "): ";
+    getline(cin, name);
+    cout << "Enter new location (" << stadium->getLocation() << "): ";
+    getline(cin, location);
+    cout << "Enter new price per hour (" << stadium->getPricePerHour() << "): ";
+
+    cin >> price;
+    cout << "Enter new rating (" << stadium->getRating() << "): ";
+    cin >> rating;
+
+    stadium->setName(name);
+    stadium->setLocation(location);
+    stadium->setPrice(price);
+    stadium->setRating(rating);
+
+    cout << "Stadium updated successfully.\n";
+}
+
+void MenuSystem::removeStadium() {
+    int stadiumID;
+    cout << "Enter Stadium ID to remove: ";
+    cin >> stadiumID;
+
+    // Подтверждение удаления
+    cout << "Are you sure you want to remove stadium with ID " << stadiumID << "? (y/n): ";
+    char confirm;
+    cin >> confirm;
+
+    if (confirm != 'y' && confirm != 'Y') {
+        cout << "Operation canceled.\n";
+        return;
+    }
+
+    if (stadiumManager.removeStadium(stadiumID)) {
+        cout << "Stadium removed successfully.\n";
+    }
+    else {
+        cout << "Stadium not found.\n";
+    }
+}
+
+void MenuSystem::addReview() {
+    cin.ignore();
+    string stadiumName, comment;
+    int rating;
+
+    cout << "Enter stadium name to review: ";
+    getline(cin, stadiumName);
+    cout << "Enter your comment: ";
+    getline(cin, comment);
+    cout << "Enter your rating (0-5): ";
+    cin >> rating;
+
+    Review review(userManager.getCurrentUsername(), stadiumName, comment, rating);
+
+    ofstream file("reviews.txt", ios::app);
+    file << review.serialize();
+    file.close();
+
+    cout << "Review added.\n";
+}
+
+void MenuSystem::viewReviews() {
+    ifstream file("reviews.txt");
+    if (!file.is_open()) {
+        cout << "No reviews found.\n";
+        return;
+    }
+
+    string line;
+    while (getline(file, line)) {
+        Review review = Review::deserialize(line);
+        review.display();
+        cout << "-----------------\n";
+    }
+    file.close();
+}
+

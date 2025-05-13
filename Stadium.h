@@ -3,11 +3,11 @@
 
 class Stadium {
 protected:
-    int id;
+    int id = 0;
     std::string name;
     std::string location;
-    float pricePerHour;
-    float rating;
+    float pricePerHour = 0;
+    float rating = 0;
 
 public:
     Stadium() = default;
@@ -15,14 +15,18 @@ public:
 
     virtual ~Stadium() = default;
 
-    int getID() const;
-    std::string getName() const;
-    std::string getLocation() const;
+    void setName(const std::string& name) { this->name = name; }
+    void setLocation(const std::string& location) { this->location = location; }
+    void setPrice(float price) { this->pricePerHour = price; }
+    void setRating(float rating) { this->rating = rating; }
+
+    int getID() const { return id; }
+    std::string getName() const { return name; }
+    std::string getLocation() const { return location; }
     float getPricePerHour() const;
-    float getRating() const;
+    float getRating() const { return rating; }
 
     virtual std::string getType() const = 0;
-
     virtual void displayInfo() const = 0;
     virtual std::string serialize() const = 0;
     virtual void deserialize(const std::string& data) = 0;

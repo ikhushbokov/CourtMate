@@ -1,47 +1,21 @@
 #pragma once
-#include <string>
-#include "Stadium.h"
-#include <iostream>
-#include <fstream>
+#include "Booking.h"
+#include "StadiumManager.h"
 #include <vector>
-using namespace std;
 
-
-struct TimeSlot {
-    std::string date;
-    int startHour = 0;
-    int duration = 1;
-
-    bool operator==(const TimeSlot& other) const {
-        return date == other.date &&
-            ((startHour < other.startHour + other.duration && startHour >= other.startHour) ||
-                (other.startHour < startHour + duration && other.startHour >= startHour));
-    }
-};
-
-
-class Booking {
+class BookingManager {
 private:
-    static int bookingCounter;
-    int bookingID;
-    int stadiumID;
-    std::string userName;
-    TimeSlot timeSlot;
-    Stadium* stadium;
+    std::vector<Booking*> bookings;
+    StadiumManager* stadiumManager;  // Adding a reference to StadiumManager to access stadium info
 
 public:
-    Booking();
-    Booking(int stadiumID, std::string userName, TimeSlot slot, Stadium* stadium);
+    BookingManager(StadiumManager* stadiumMgr);  // Constructor should accept a StadiumManager reference
+    ~BookingManager();
 
-    int getStadiumID() const;
-    TimeSlot getTimeSlot() const;
-    std::string getUserName() const;
-    int getBookingID() const;
-
-    void displayBookingInfo() const;
-    void setStadium(Stadium* stadiumPtr);  // ✅ новое
-
-    std::string serialize() const;
-    void deserialize(const std::string& data);
-    bool conflictsWith(const Booking& other) const;
+    void addBooking(Booking* booking);
+    void displayAllBookings() const;
+    bool isBookingAvailable(const Booking& newBooking) const;
+    void saveToFile(const std::string& filename) const;
+    void loadFromFile(const std::string& filename);
 };
+

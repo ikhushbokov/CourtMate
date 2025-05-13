@@ -113,3 +113,14 @@ void StadiumManager::saveToFile(const string& filename) const {
         cerr << "Unable to open file." << endl;
     }
 }
+bool StadiumManager::removeStadium(int id) {
+    for (auto it = stadiums.begin(); it != stadiums.end(); ++it) {
+        if ((*it)->getID() == id) {
+            delete* it;
+            stadiums.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
